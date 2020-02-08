@@ -18,7 +18,9 @@ from adafruit_tlc59711.adafruit_tlc59711_multi import TLC59711Multi
 import adafruit_fancyled.adafruit_fancyled as fancyled
 from pixel_map import PixelMap2D
 
+from mapping import map_range
 from mapping import multi_map
+from mapping import multi_map_tuple
 from mapping import MultiMap
 
 
@@ -120,30 +122,63 @@ palette = [
 ]
 
 
-paper_colors = [
-    (0.5, 1.0, 1.0),
-    (0.5, 1.0, 1.0),
-    (0.5, 1.0, 1.0),
-    (0.5, 1.0, 1.0),
+paper_colors_day = [
+    # frame
+    (0,  (0.15, 0.8, 0.2)),
+    (3,  (0.15, 0.8, 0.4)),
+    # hills
+    (4,  (0.25, 1.0, 0.5)),
+    (8, (0.25, 1.0, 0.8)),
+    # mountains mid
+    (9, (0.3, 0.5, 0.7)),
+    (11, (0.3, 0.5, 0.5)),
+    # river
+    (12, (0.5, 1.0, 0.5)),
+    (12, (0.5, 1.0, 0.5)),
+    # mountains
+    (13, (0.3, 1.0, 1.0)),
+    (14, (0.3, 1.0, 1.0)),
+    # sky
+    (15, (0.5, 0.7, 1.0)),
+    (16, (0.5, 0.7, 1.0)),
+    # stars
+    (17, (0.5, 1.0, 0.0)),
+    (19, (0.5, 1.0, 0.0)),
+    # unused
+    (20, (0.0, 0.0, 0.0)),
+    (32, (0.0, 0.0, 0.0)),
+]
+
+paper_colors_night = [
+    # frame
+    (0,  (0.15, 0.8, 0.05)),
+    (3,  (0.15, 0.8, 0.1)),
+    # hills
+    (4,  (0.25, 1.0, 0.1)),
+    (8, (0.25, 1.0, 0.2)),
+    # mountains mid
+    (9, (0.15, 0.8, 0.2)),
+    (11, (0.15, 0.8, 0.2)),
+    # river
+    (12, (0.6, 1.0, 0.2)),
+    (12, (0.6, 1.0, 0.2)),
+    # mountains
+    (13, (0.8, 1.0, 0.4)),
+    (14, (0.8, 1.0, 0.4)),
+    # sky
+    (15, (0.7, 1.0, 0.5)),
+    (16, (0.7, 1.0, 0.5)),
+    # stars
+    (17, (0.14, 0.9, 1.0)),
+    (19, (0.14, 0.9, 1.0)),
+    # unused
+    (20, (0.0, 0.0, 0.0)),
+    (32, (0.0, 0.0, 0.0)),
 ]
 
 
 ##########################################
 # helper function
-
-def map_range(x, in_min, in_max, out_min, out_max):
-    """Map Value from one range to another."""
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-
-
-def map_range_int(x, in_min, in_max, out_min, out_max):
-    """Map Value from one range to another."""
-    return int(
-        (x - in_min) * (out_max - out_min)
-        //
-        (in_max - in_min) + out_min
-    )
-
 
 def wait_with_print(duration=1):
     """Wait with print."""
@@ -186,7 +221,7 @@ class AnimationHelper(object):
         self.offset = 0
         self.speed = 0.003
         self.animation_run = True
-        self.brightness = 0.05
+        self.brightness = 0.5
 
     ##########################################
     # test functions
@@ -348,22 +383,33 @@ class AnimationHelper(object):
         my_col_count = int(Matrix_col_count / 2)
         for row_index in range(my_row_count):
 
-            # results in 99.41ms
+            # color_raw = multi_map_tuple(row_index, paper_colors_day)
+            color_raw = multi_map_tuple(row_index, paper_colors_night)
+            # print("color_raw", color_raw)
             color = fancyled.CHSV(
-                self.offset +
-                # (row_index / my_row_count),
-                map_range(
-                    row_index,
-                    0, my_row_count,
-                    0, 1.0
-                ),
-                # v=0.05
+                h=color_raw[0],
+                s=color_raw[1],
+                v=color_raw[2],
             )
+            # print("color", color)
+            # results in 99.41ms
+            # color = fancyled.CHSV(
+            #     self.offset +
+            #     # (row_index / my_row_count),
+            #     map_range(
+            #         row_index,
+            #         0, my_row_count,
+            #         0, 1.0
+            #     ),
+            #     # v=0.05
+            # )
             color_r, color_g, color_b = fancyled.gamma_adjust(
                 color,
                 brightness=self.brightness
             )
 
+            # row_i = row_index
+            row_i = int(row_index / 2)
             for col_index in range(my_col_count):
                 # print(
                 #     "row:{:2}, "
@@ -372,8 +418,6 @@ class AnimationHelper(object):
                 #     end=""
                 # )
                 col_i = col_index
-                # row_i = row_index
-                row_i = int(row_index / 2)
                 if row_index % 2:
                     col_i = my_col_count + col_index
                 # print(
@@ -395,6 +439,35 @@ class AnimationHelper(object):
         if self.offset >= max_offset:
             self.offset -= max_offset
             print("offset reset")
+
+    def set_row_color(self, row_index, color):
+        """Set row color."""
+        color_r, color_g, color_b = fancyled.gamma_adjust(
+            color,
+            brightness=self.brightness
+        )
+
+        # set all columns to same value
+        my_col_count = int(Matrix_col_count / 2)
+        row = int(row_index / 2)
+        for col_index in range(my_col_count):
+            col = col_index
+            if row_index % 2:
+                col = my_col_count + col
+            try:
+                # pixel_index = pmap.map(col=col, row=row)
+                pixel_index = pmap.map_raw[row][col]
+            except IndexError as e:
+                print(
+                    "{}; "
+                    "row:'{:>3}' "
+                    "col:'{:>3}' "
+                    "".format(e, col, row)
+                )
+            pixels.set_pixel_float_value(
+                pixel_index,
+                color_r, color_g, color_b
+            )
 
     @staticmethod
     def handle_pixel_set(input_string):
@@ -447,6 +520,51 @@ class AnimationHelper(object):
         pixels.set_pixel_16bit_value(pixel_index, value, value, value)
         pixels.show()
 
+    def handle_row_set(self, input_string):
+        """Handle row set."""
+        row_index = 0
+        value = 0.0
+        brightness = 1.0
+
+        sep_value = input_string.find(":")
+        try:
+            row_index = int(input_string[1:sep_value])
+        except ValueError as e:
+            print("Exception parsing 'row': ", e)
+
+        sep_pos = input_string.find(",")
+        try:
+            if sep_pos is -1:
+                value = float(input_string[sep_value+1:])
+            else:
+                value = float(input_string[sep_value+1:sep_pos])
+        except ValueError as e:
+            print("Exception parsing 'value': ", e)
+        try:
+            brightness = float(input_string[sep_pos+1:])
+        except ValueError as e:
+            print("Exception parsing 'brightness': ", e)
+        # sep_pos = input_string.find(",")
+
+        print(
+            "row:{:2} "
+            "value:{} "
+            "brightness:{} "
+            "".format(
+                row_index,
+                value,
+                brightness,
+            )
+        )
+
+        color = fancyled.CHSV(
+            h=value,
+            s=1.0,
+            v=brightness
+        )
+        self.set_row_color(row_index, color)
+        pixels.show()
+
     def handle_brightness(self, input_string):
         """Handle brightness set."""
         value = 0
@@ -471,6 +589,7 @@ class AnimationHelper(object):
             "you can set some options:\n"
             "- a single pixel by index: 'p18:500'\n"
             "- a single pixel by col row: 'm2,5:500'\n"
+            "- a single row: 'r2:0.1'\n"
             "- toggle animation: 'a'\n"
             "- set brightness: 'b{}'\n"
             "- set speed: 's{}'\n"
@@ -488,6 +607,8 @@ class AnimationHelper(object):
             self.handle_pixel_set(input_string)
         if "m" in input_string:
             self.handle_pixel_map_set(input_string)
+        if "r" in input_string:
+            self.handle_row_set(input_string)
         if "a" in input_string:
             self.animation_run = not self.animation_run
         if "b" in input_string:

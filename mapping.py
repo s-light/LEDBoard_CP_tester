@@ -54,8 +54,8 @@ def multi_map(val, array_in, array_out):
 
     if (val <= array_in[0]):
         return array_out[0]
-    if (val >= array_in[N-1]):
-        return array_out[N-1]
+    if (val >= array_in[-1]):
+        return array_out[-1]
 
     # search right interval
     # array_in[0] allready tested
@@ -73,6 +73,53 @@ def multi_map(val, array_in, array_out):
         array_in[pos-1], array_in[pos],
         array_out[pos-1], array_out[pos]
     )
+    return result
+
+
+def multi_map_tuple(val, array):
+    """Map value."""
+    result = None
+
+    if (val <= array[0][0]):
+        result = array[0][1]
+    if (val >= array[-1][0]):
+        result = array[-1][1]
+
+    # search right interval
+    # array[0][0] allready tested
+    pos = 1
+    while (val > array[pos][0]):
+        pos += 1
+
+    # this will handle all exact "points"
+    if (val == array[pos][0]):
+        result = array[pos][0]
+
+    # interpolate in the right segment for the rest
+
+    out_low = array[pos-1][1]
+    out_hig = array[pos][1]
+    # print("out_low", out_low)
+    try:
+        temp = []
+        for tuple_index in range(len(out_low)):
+            # print("out_low[tuple_index]", out_low[tuple_index])
+            temp.append(map_range(
+                val,
+                array[pos-1][0], array[pos][0],
+                out_low[tuple_index], out_hig[tuple_index]
+            ))
+        result = tuple(temp)
+        # print("temp", temp)
+        # print("result", result)
+    except TypeError as e:
+        print("TypeError: ", e)
+        result = map_range(
+            val,
+            array[pos-1][0], array[pos][0],
+            out_low, out_hig
+        )
+    # print("result", result)
     return result
 
 

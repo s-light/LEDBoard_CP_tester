@@ -51,9 +51,7 @@ def main_setup():
 
 def main_loop():
     """Loop."""
-    myIRHelper.check()
     animation.animation_helper.main_loop()
-    myIRHelper.check()
     # time.sleep(0.1)
 
 
