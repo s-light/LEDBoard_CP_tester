@@ -18,6 +18,9 @@ from adafruit_tlc59711.adafruit_tlc59711_multi import TLC59711Multi
 import adafruit_fancyled.adafruit_fancyled as fancyled
 from pixel_map import PixelMap2D
 
+from mapping import multi_map
+from mapping import MultiMap
+
 
 ##########################################
 if __name__ == '__main__':
@@ -117,7 +120,12 @@ palette = [
 ]
 
 
-paper_colors = []
+paper_colors = [
+    (0.5, 1.0, 1.0),
+    (0.5, 1.0, 1.0),
+    (0.5, 1.0, 1.0),
+    (0.5, 1.0, 1.0),
+]
 
 
 ##########################################
