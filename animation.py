@@ -354,8 +354,8 @@ class MyAnimation(object):
         my_col_count = int(Matrix_col_count / 2)
         for row_index in range(my_row_count):
 
-            # color_raw = multi_map_tuple(row_index, paper_colors_day)
-            color_raw = multi_map_tuple(row_index, paper_colors_night)
+            color_raw = multi_map_tuple(row_index, paper_colors_day)
+            # color_raw = multi_map_tuple(row_index, paper_colors_night)
             # print("color_raw", color_raw)
             color = fancyled.CHSV(
                 h=color_raw[0],

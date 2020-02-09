@@ -63,7 +63,9 @@ class MyDebugMenu(object):
                 string_part = input_string[start_pos:]
             else:
                 string_part = input_string[start_pos:seperator_pos]
-            result.append(self.parse_value(string_part, parse_function))
+            if len(string_part) > 0:
+                print("''".format(string_part))
+                result.append(self.parse_value(string_part, parse_function))
             start_pos = seperator_pos + 1
             if seperator_pos == -1:
                 flag_search = False
@@ -73,7 +75,7 @@ class MyDebugMenu(object):
         """Parse color."""
         color = fancyled.CHSV(h=0.5, s=1.0, v=1.0)
         values = self.parse_values(input_string, float)
-        print("values", values)
+        print("color values", values)
         if len(values) is 1:
             # white
             color = fancyled.CHSV(
@@ -131,26 +133,30 @@ class MyDebugMenu(object):
 
     def handle_pixel_map_set(self, input_string):
         """Handle Pixel Set."""
+        print("handle_pixel_map_set")
         col = 0
         row = 0
 
-        sep_value = input_string.find(":")
-        values = self.parse_values(input_string[1:sep_value], int)
+        seperator_pos = input_string.find(":")
+        if seperator_pos == -1:
+            values = self.parse_values(input_string[1:], int)
+            color = fancyled.CHSV(h=0.5, s=1.0, v=1.0)
+        else:
+            values = self.parse_values(input_string[1:sep_value], int)
+            color = self.parse_color(input_string[sep_value+1:])
         print("values", values)
         try:
             col, row = values
         except ValueError as e:
             print("Exception parsing 'col & row': ", e)
 
-        color = self.parse_color(input_string[sep_value+1:])
-
         print(
             "col:{:2} "
             "row:{:2} "
             "color:{} "
             "".format(
-                col_index,
-                row_index,
+                col,
+                row,
                 color,
             )
         )
@@ -228,23 +234,22 @@ class MyDebugMenu(object):
         input_string = input()
         if "p" in input_string:
             self.handle_pixel_set(input_string)
-        if "m" in input_string:
+        elif "m" in input_string:
             self.handle_pixel_map_set(input_string)
-        if "t" in input_string:
+        elif "t" in input_string:
             self.handle_test(input_string)
-        if "r" in input_string:
+        elif "r" in input_string:
             self.handle_row_set(input_string)
-        if "a" in input_string:
+        elif "a" in input_string:
             self.animation.animation_run = not self.animation.animation_run
-        if "b" in input_string:
+        elif "b" in input_string:
             self.handle_brightness(input_string)
-        if "s" in input_string:
+        elif "s" in input_string:
             self.handle_speed(input_string)
-        if "u" in input_string:
+        elif "u" in input_string:
             self.animation.update_animation()
-        # prepare new input
-        # print("enter new values:")
-        self.print_help()
+        else:
+            self.print_help()
         print(">> ", end="")
 
     def update(self):
