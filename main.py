@@ -11,6 +11,7 @@ import time
 import board
 
 import adafruit_fancyled.adafruit_fancyled as fancyled
+
 import animation
 import debugmenu
 
@@ -23,19 +24,15 @@ if __name__ == '__main__':
     print(42 * '*')
     print()
 
-##########################################
-# helper function
-
 
 ##########################################
-#
+# main objects
 my_animation = animation.MyAnimation()
 my_debug_menu = debugmenu.MyDebugMenu(my_animation)
 
 
 ##########################################
 # main
-
 
 def main_setup():
     """Setup."""

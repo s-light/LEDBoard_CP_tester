@@ -186,11 +186,13 @@ class MyAnimation(object):
     def __init__(self):
         """Init."""
         super(MyAnimation, self).__init__()
+        self.pixels = pixels
+        self.pmap = pmap
+
         self.offset = 0
         self.speed = 0.003
         self.animation_run = True
         self.brightness = 0.5
-        self.pixels = pixels
 
     ##########################################
     # animation patterns & test
@@ -411,6 +413,38 @@ class MyAnimation(object):
 
     ##########################################
     # mapping helper
+
+    def set_pixel_color(self, row_index, col_index, color):
+        """Set pixel color."""
+        color_r, color_g, color_b = fancyled.gamma_adjust(
+            color,
+            brightness=self.brightness
+        )
+
+        my_col_count = int(Matrix_col_count / 2)
+        row = int(row_index / 2)
+        col = col_index
+        if row_index % 2:
+            col = my_col_count + col
+        try:
+            # pixel_index = pmap.map(col=col, row=row)
+            pixel_index = pmap.map_raw[row][col]
+        except IndexError as e:
+            print(
+                "{}; "
+                "row:'{:>3}' "
+                "col:'{:>3}' "
+                "".format(e, col, row)
+            )
+        # try:
+        #     pixel_index = self.animation.pmap.map(col=col, row=row)
+        # except IndexError as e:
+        #     print("{}; col:'{:>3}' row:'{:>3}'".format(e, col, row))
+        pixels.set_pixel_float_value(
+            pixel_index,
+            color_r, color_g, color_b
+        )
+        return pixel_index
 
     def set_row_color(self, row_index, color):
         """Set row color."""
