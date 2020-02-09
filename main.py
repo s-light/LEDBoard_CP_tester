@@ -12,6 +12,7 @@ import board
 
 import adafruit_fancyled.adafruit_fancyled as fancyled
 import animation
+import debugmenu
 
 
 ##########################################
@@ -27,7 +28,9 @@ if __name__ == '__main__':
 
 
 ##########################################
-# function
+#
+my_animation = animation.MyAnimation()
+my_debug_menu = debugmenu.MyDebugMenu(my_animation)
 
 
 ##########################################
@@ -51,7 +54,8 @@ def main_setup():
 
 def main_loop():
     """Loop."""
-    animation.animation_helper.main_loop()
+    my_animation.update()
+    my_debug_menu.update()
     # time.sleep(0.1)
 
 

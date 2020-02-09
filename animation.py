@@ -8,8 +8,6 @@ it combines the TLC5971 library with FancyLED and 2D Array / Mapping.
 Enjoy the colors :-)
 """
 
-import time
-
 import board
 import busio
 import supervisor
@@ -22,6 +20,9 @@ from mapping import map_range
 from mapping import multi_map
 from mapping import multi_map_tuple
 from mapping import MultiMap
+
+from helper import wait_with_print
+from helper import time_measurement_call
 
 
 ##########################################
@@ -178,53 +179,21 @@ paper_colors_night = [
 
 
 ##########################################
-# helper function
 
-def wait_with_print(duration=1):
-    """Wait with print."""
-    step_duration = 0.5
-    waiting_duration = 0
-    while waiting_duration < duration:
-        # print(". ", end='', flush=True)
-        print(".", end='')
-        time.sleep(step_duration)
-        waiting_duration += step_duration
-    print("")
-
-
-def time_measurement_call(message, test_function, loop_count=1000):
-    """Measure timing."""
-    duration = 0
-    start_time = time.monotonic()
-    for _index in range(loop_count):
-        start_time = time.monotonic()
-        test_function()
-        end_time = time.monotonic()
-        duration += end_time - start_time
-    print(
-        "{call_duration:>8.2f}ms\t{message}"
-        "".format(
-            call_duration=(duration / loop_count) * 1000,
-            message=message,
-        )
-    )
-
-
-##########################################
-
-class AnimationHelper(object):
-    """AnimationHelper."""
+class MyAnimation(object):
+    """MyAnimation."""
 
     def __init__(self):
         """Init."""
-        super(AnimationHelper, self).__init__()
+        super(MyAnimation, self).__init__()
         self.offset = 0
         self.speed = 0.003
         self.animation_run = True
         self.brightness = 0.5
+        self.pixels = pixels
 
     ##########################################
-    # test functions
+    # animation patterns & test
 
     @staticmethod
     def test_set_corners_to_colors():
@@ -440,6 +409,9 @@ class AnimationHelper(object):
             self.offset -= max_offset
             print("offset reset")
 
+    ##########################################
+    # mapping helper
+
     def set_row_color(self, row_index, color):
         """Set row color."""
         color_r, color_g, color_b = fancyled.gamma_adjust(
@@ -469,158 +441,24 @@ class AnimationHelper(object):
                 color_r, color_g, color_b
             )
 
-    @staticmethod
-    def handle_pixel_set(input_string):
-        """Handle Pixel Set."""
-        pixel = 0
-        value = 0
-        sep = input_string.find(":")
-        try:
-            pixel = int(input_string[1:sep])
-        except ValueError as e:
-            print("Exception parsing 'pixel': ", e)
-        try:
-            value = int(input_string[sep+1:])
-        except ValueError as e:
-            print("Exception parsing 'value': ", e)
-        pixels.set_pixel_16bit_value(pixel, value, value, value)
-        pixels.show()
+    ##########################################
+    # main animation handling
 
-    @staticmethod
-    def handle_pixel_map_set(input_string):
-        """Handle Pixel Set."""
-        row = 0
-        col = 0
-        value = 0
+    def update_animation(self):
+        """Update animation."""
+        # self.test_loop_2d_colors()
+        # self.rainbow_update()
+        # self.rainbow_update_offset()
+        self.test_paper1_update()
+        self.test_paper1_update_offset()
 
-        sep_pos = input_string.find(",")
-        sep_value = input_string.find(":")
-        try:
-            col = int(input_string[1:sep_pos])
-        except ValueError as e:
-            print("Exception parsing 'col': ", e)
-        try:
-            row = int(input_string[sep_pos+1:sep_value])
-        except ValueError as e:
-            print("Exception parsing 'row': ", e)
-        try:
-            value = int(input_string[sep_value+1:])
-        except ValueError as e:
-            print("Exception parsing 'value': ", e)
-        pixel_index = 0
-        try:
-            pixel_index = pmap.map(col=col, row=row)
-        except IndexError as e:
-            print("{}; col:'{:>3}' row:'{:>3}'".format(e, col, row))
+    def update(self):
+        """Update."""
+        if self.animation_run:
+            self.update_animation()
 
-        print(
-            "pixel_index:'{:>3}' col:'{:>3}' row:'{:>3}'"
-            "".format(pixel_index, col, row)
-        )
-        pixels.set_pixel_16bit_value(pixel_index, value, value, value)
-        pixels.show()
-
-    def handle_row_set(self, input_string):
-        """Handle row set."""
-        row_index = 0
-        value = 0.0
-        brightness = 1.0
-
-        sep_value = input_string.find(":")
-        try:
-            row_index = int(input_string[1:sep_value])
-        except ValueError as e:
-            print("Exception parsing 'row': ", e)
-
-        sep_pos = input_string.find(",")
-        try:
-            if sep_pos is -1:
-                value = float(input_string[sep_value+1:])
-            else:
-                value = float(input_string[sep_value+1:sep_pos])
-        except ValueError as e:
-            print("Exception parsing 'value': ", e)
-        try:
-            brightness = float(input_string[sep_pos+1:])
-        except ValueError as e:
-            print("Exception parsing 'brightness': ", e)
-        # sep_pos = input_string.find(",")
-
-        print(
-            "row:{:2} "
-            "value:{} "
-            "brightness:{} "
-            "".format(
-                row_index,
-                value,
-                brightness,
-            )
-        )
-
-        color = fancyled.CHSV(
-            h=value,
-            s=1.0,
-            v=brightness
-        )
-        self.set_row_color(row_index, color)
-        pixels.show()
-
-    def handle_brightness(self, input_string):
-        """Handle brightness set."""
-        value = 0
-        try:
-            value = float(input_string[1:])
-        except ValueError as e:
-            print("Exception parsing 'value': ", e)
-        self.brightness = value
-
-    def handle_speed(self, input_string):
-        """Handle brightness set."""
-        value = 0
-        try:
-            value = float(input_string[1:])
-        except ValueError as e:
-            print("Exception parsing 'value': ", e)
-        self.speed = value
-
-    def print_help(self):
-        """Print Help."""
-        print(
-            "you can set some options:\n"
-            "- a single pixel by index: 'p18:500'\n"
-            "- a single pixel by col row: 'm2,5:500'\n"
-            "- a single row: 'r2:0.1'\n"
-            "- toggle animation: 'a'\n"
-            "- set brightness: 'b{}'\n"
-            "- set speed: 's{}'\n"
-            "- update animation: 'u'\n"
-            "".format(
-                self.brightness,
-                self.speed
-            )
-        )
-
-    def check_input(self):
-        """Check Input."""
-        input_string = input()
-        if "p" in input_string:
-            self.handle_pixel_set(input_string)
-        if "m" in input_string:
-            self.handle_pixel_map_set(input_string)
-        if "r" in input_string:
-            self.handle_row_set(input_string)
-        if "a" in input_string:
-            self.animation_run = not self.animation_run
-        if "b" in input_string:
-            self.handle_brightness(input_string)
-        if "s" in input_string:
-            self.handle_speed(input_string)
-        if "u" in input_string:
-            self.rainbow_update()
-        # prepare new input
-        # print("enter new values:")
-        self.print_help()
-        print(">> ", end="")
+    ##########################################
+    # time tests
 
     def time_meassurements(self):
         """Test Main."""
@@ -666,27 +504,16 @@ class AnimationHelper(object):
             loop_count
         )
 
-    def main_loop(self):
-        """Loop."""
-        if supervisor.runtime.serial_bytes_available:
-            self.check_input()
-        if self.animation_run:
-            # self.test_loop_2d_colors()
-            # self.rainbow_update()
-            # self.rainbow_update_offset()
-            self.test_paper1_update()
-            self.test_paper1_update_offset()
-
     def run_test(self):
         """Test Main."""
         # pmap.print_mapping()
 
-        pixels.set_pixel_all_16bit_value(1, 1, 1)
-        # pixels.set_pixel_all_16bit_value(100, 100, 100)
-        # pixels.show()
+        self.pixels.set_pixel_all_16bit_value(1, 1, 1)
+        # self.pixels.set_pixel_all_16bit_value(100, 100, 100)
+        # self.pixels.show()
         # wait_with_print(1)
         pixels_init_BCData()
-        pixels.show()
+        self.pixels.show()
         # wait_with_print(1)
 
         # self.test_set_corners_to_colors()
@@ -700,18 +527,14 @@ class AnimationHelper(object):
         self.time_measurement_test1()
         wait_with_print(1)
 
-        print(42 * '*')
-        print("loop")
-        if supervisor.runtime.serial_connected:
-            self.print_help()
-        while True:
-            self.main_loop()
-
-
-animation_helper = AnimationHelper()
 
 ##########################################
 # main loop
 
 if __name__ == '__main__':
-    animation_helper.run_test()
+    my_animation = MyAnimation()
+    my_animation.run_test()
+    print(42 * '*')
+    print("loop")
+    while True:
+        my_animation.update()
