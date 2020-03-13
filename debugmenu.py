@@ -220,12 +220,13 @@ class MyDebugMenu(object):
             "- single pixel by col row: 'm2,5:color'\n"
             "- full row: 'r2:color'\n"
             "- toggle animation: 'a'\n"
-            "- set brightness: 'b{}'\n"
-            "- set speed: 's{}'\n"
+            "- set brightness: 'b{brightness}'\n"
+            "- set speed: 's{speed}'\n"
             "- update animation: 'u'\n"
+            "- toggle paper colors: 'c'\n"
             "".format(
-                self.animation.brightness,
-                self.animation.speed
+                brightness=self.animation.brightness,
+                speed=self.animation.speed
             )
         )
 
@@ -248,6 +249,8 @@ class MyDebugMenu(object):
             self.handle_speed(input_string)
         elif "u" in input_string:
             self.animation.update_animation()
+        elif "c" in input_string:
+            self.animation.paper_colors_toggle()
         else:
             self.print_help()
         print(">> ", end="")

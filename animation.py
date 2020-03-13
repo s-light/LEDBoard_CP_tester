@@ -152,7 +152,7 @@ paper_colors_day = [
 
 paper_colors_night = [
     # frame
-    (0,  (0.15, 0.8, 0.05)),
+    (0,  (0.15, 0.8, 0.07)),
     (3,  (0.15, 0.8, 0.1)),
     # hills
     (4,  (0.25, 1.0, 0.1)),
@@ -167,8 +167,8 @@ paper_colors_night = [
     (13, (0.8, 1.0, 0.4)),
     (14, (0.8, 1.0, 0.4)),
     # sky
-    (15, (0.7, 1.0, 0.5)),
-    (16, (0.7, 1.0, 0.5)),
+    (15, (0.7, 1.0, 0.8)),
+    (16, (0.7, 1.0, 0.6)),
     # stars
     (17, (0.14, 0.9, 1.0)),
     (19, (0.14, 0.9, 1.0)),
@@ -176,7 +176,6 @@ paper_colors_night = [
     (20, (0.0, 0.0, 0.0)),
     (32, (0.0, 0.0, 0.0)),
 ]
-
 
 ##########################################
 
@@ -190,9 +189,11 @@ class MyAnimation(object):
         self.pmap = pmap
 
         self.offset = 0
-        self.speed = 0.003
+        self.speed = 0.001
         self.animation_run = True
+        # self.brightness = 0.001
         self.brightness = 0.5
+        self.paper_colors_current = paper_colors_day
 
     ##########################################
     # animation patterns & test
@@ -353,9 +354,7 @@ class MyAnimation(object):
         my_row_count = Matrix_row_count * 2
         my_col_count = int(Matrix_col_count / 2)
         for row_index in range(my_row_count):
-
-            color_raw = multi_map_tuple(row_index, paper_colors_day)
-            # color_raw = multi_map_tuple(row_index, paper_colors_night)
+            color_raw = multi_map_tuple(row_index, self.paper_colors_current)
             # print("color_raw", color_raw)
             color = fancyled.CHSV(
                 h=color_raw[0],
@@ -410,6 +409,15 @@ class MyAnimation(object):
         if self.offset >= max_offset:
             self.offset -= max_offset
             print("offset reset")
+
+    def paper_colors_toggle(self):
+        """Toggle Paper colors."""
+        if self.paper_colors_current is paper_colors_day:
+            print("switched to night")
+            self.paper_colors_current = paper_colors_night
+        else:
+            print("switched to day")
+            self.paper_colors_current = paper_colors_day
 
     ##########################################
     # mapping helper
