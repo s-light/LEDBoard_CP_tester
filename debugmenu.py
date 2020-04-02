@@ -174,7 +174,7 @@ class MyDebugMenu(object):
         row_index = 0
 
         sep_value = input_string.find(":")
-        value = self.parse_value(input_string[1:sep_value], int)
+        row_index = self.parse_value(input_string[1:sep_value], int)
         color = self.parse_color(input_string[sep_value+1:])
 
         print(
@@ -206,6 +206,12 @@ class MyDebugMenu(object):
             print("Exception parsing 'value': ", e)
         self.animation.speed = value
 
+    # menu_content = {
+    #     "off": {
+    #         "func": def ():
+    #     },
+    # }
+
     def print_help(self):
         """Print Help."""
         print(
@@ -216,6 +222,7 @@ class MyDebugMenu(object):
             "    H V '0.2,1.0'\n"
             "      V '1.0'\n"
             "- test: 't12,12'\n"
+            "- all off 'off'\n"
             "- single pixel by index: 'p14:65000'\n"
             "- single pixel by col row: 'm2,5:color'\n"
             "- full row: 'r2:color'\n"
@@ -233,7 +240,10 @@ class MyDebugMenu(object):
     def check_input(self):
         """Check Input."""
         input_string = input()
-        if "p" in input_string:
+        if "off" in input_string:
+            self.animation.pixels.set_all_black()
+            self.animation.pixels.show()
+        elif "p" in input_string:
             self.handle_pixel_set(input_string)
         elif "m" in input_string:
             self.handle_pixel_map_set(input_string)

@@ -51,14 +51,27 @@ LEDBoard_single = [
     [5, 4, 1, 0],
 ]
 
-Boards_col_count = 2
+LEDBoard_single_90deg = [
+    [10, 8, 2, 0],
+    [11, 9, 3, 1],
+    [14, 12, 6, 4],
+    [15, 13, 7, 5],
+]
+
+Boards_col_count = 4
 Boards_row_count = 4
 Boards_count = Boards_col_count * Boards_row_count
 Boards_positions = [
-    [4, 0],
-    [5, 1],
-    [6, 2],
-    [7, 3],
+    [12, 8, 4, 0],
+    [13, 9, 5, 1],
+    [14, 10, 6, 2],
+    [15, 11, 7, 3],
+]
+Boards_pos_type = [
+    [0, 1, 1, 0],
+    [0, 1, 1, 0],
+    [0, 1, 1, 0],
+    [0, 1, 1, 0],
 ]
 
 Matrix_col_count = LEDBoard_col_count * Boards_col_count
@@ -75,7 +88,13 @@ def mymap_LEDBoard_4x4_16bit(self, *, col=0, row=0):
     board_sub_row = row % LEDBoard_row_count
 
     board_offset = Boards_positions[board_row][board_col]
-    pixel_offset = LEDBoard_single[board_sub_row][board_sub_col]
+    board_type = Boards_pos_type[board_row][board_col]
+    if board_type == 0:
+        pixel_offset = LEDBoard_single[board_sub_row][board_sub_col]
+    elif board_type == 1:
+        pixel_offset = LEDBoard_single_90deg[board_sub_row][board_sub_col]
+    else:
+        print("ERROR: board_type {} not implemented.".format(board_type))
 
     pixel_index = (board_offset * LEDBoard_pixel_count) + pixel_offset
 
@@ -463,7 +482,7 @@ class MyAnimation(object):
 
         # set all columns to same value
         my_col_count = int(Matrix_col_count / 2)
-        row = int(row_index / 2)
+        row = int(row_index / 4)
         for col_index in range(my_col_count):
             col = col_index
             if row_index % 2:
