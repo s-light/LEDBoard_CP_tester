@@ -58,22 +58,35 @@ LEDBoard_single_90deg = [
     [15, 13, 7, 5],
 ]
 
-Boards_col_count = 4
-Boards_row_count = 4
-Boards_count = Boards_col_count * Boards_row_count
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# boad layout
+Boards_col_count = 1
+Boards_row_count = 1
 Boards_positions = [
-    [12, 8, 4, 0],
-    [13, 9, 5, 1],
-    [14, 10, 6, 2],
-    [15, 11, 7, 3],
+    [0, 1],
+    [2, 3],
 ]
 Boards_pos_type = [
-    [0, 1, 1, 0],
-    [0, 1, 1, 0],
-    [0, 1, 1, 0],
-    [0, 1, 1, 0],
+    [1, 0],
+    [0, 0],
 ]
 
+# Boards_col_count = 4
+# Boards_row_count = 4
+# Boards_positions = [
+#     [12, 8, 4, 0],
+#     [13, 9, 5, 1],
+#     [14, 10, 6, 2],
+#     [15, 11, 7, 3],
+# ]
+# Boards_pos_type = [
+#     [0, 1, 1, 0],
+#     [0, 1, 1, 0],
+#     [0, 1, 1, 0],
+#     [0, 1, 1, 0],
+# ]
+
+Boards_count = Boards_col_count * Boards_row_count
 Matrix_col_count = LEDBoard_col_count * Boards_col_count
 Matrix_row_count = LEDBoard_row_count * Boards_row_count
 Matrix_pixel_count = Matrix_col_count * Matrix_row_count
@@ -142,6 +155,13 @@ palette = [
 ]
 
 
+chakra_diagonal = [
+    [(0.00, 1.0, 1.0), (0.10, 1.0, 1.0), (0.13, 1.0, 1.0), (0.25, 1.0, 1.0)],
+    [(0.10, 1.0, 1.0), (0.13, 1.0, 1.0), (0.25, 1.0, 1.0), (0.40, 1.0, 1.0)],
+    [(0.13, 1.0, 1.0), (0.25, 1.0, 1.0), (0.40, 1.0, 1.0), (0.55, 1.0, 1.0)],
+    [(0.25, 1.0, 1.0), (0.40, 1.0, 1.0), (0.55, 1.0, 1.0), (0.76, 1.0, 1.0)],
+]
+
 paper_colors_day = [
     # frame
     (0,  (0.15, 0.8, 0.2)),
@@ -208,10 +228,11 @@ class MyAnimation(object):
         self.pmap = pmap
 
         self.offset = 0
-        self.speed = 0.001
+        self.speed = 0.0001
         self.animation_run = True
+        # self.animation_run = False
         # self.brightness = 0.001
-        self.brightness = 0.5
+        self.brightness = 0.02
         self.paper_colors_current = paper_colors_day
 
     ##########################################
@@ -246,6 +267,31 @@ class MyAnimation(object):
         # pixels[pmap.map(0, 7)] = (0.01, 0.0, 0.1)
         # pixels[pmap.map(15, 0)] = (0.01, 0.01, 0.0)
         # pixels[pmap.map(15, 7)] = (0.0, 0.01, 0.1)
+        pixels.show()
+
+    def set_chakra_colors(self):
+        """Set chakra colors"""
+        print(42 * '*')
+        print("set chakra colors")
+        for x in range(Matrix_col_count):
+            for y in range(Matrix_row_count):
+                pixel_index = 0
+                try:
+                    pixel_index = pmap.map(col=x, row=y)
+                except IndexError as e:
+                    print("{}; col:{col} row:{row}".format(e, col=x, row=y))
+                # color = chakra_diagonal[x][y]
+                color = fancyled.CHSV(*chakra_diagonal[x][y])
+                color_r, color_g, color_b = fancyled.gamma_adjust(
+                    color,
+                    brightness=self.brightness
+                )
+                pixels.set_pixel_float_value(
+                    pixel_index,
+                    color_r, color_g, color_b
+                )
+
+        pixels.show()
         pixels.show()
 
     @staticmethod
@@ -337,7 +383,7 @@ class MyAnimation(object):
                 # (row_index / Matrix_row_count),
                 map_range(
                     row_index,
-                    0, Matrix_row_count,
+                    0, Matrix_row_count*2,
                     0, 1.0
                 ),
                 # v=0.05
@@ -508,10 +554,10 @@ class MyAnimation(object):
     def update_animation(self):
         """Update animation."""
         # self.test_loop_2d_colors()
-        # self.rainbow_update()
-        # self.rainbow_update_offset()
-        self.test_paper1_update()
-        self.test_paper1_update_offset()
+        self.rainbow_update()
+        self.rainbow_update_offset()
+        # self.test_paper1_update()
+        # self.test_paper1_update_offset()
 
     def update(self):
         """Update."""

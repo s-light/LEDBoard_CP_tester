@@ -47,6 +47,8 @@ def main_setup():
     animation.pixels_init_BCData()
     animation.pixels.show()
     # animation.wait_with_print(1)
+    my_animation.set_chakra_colors()
+    animation.pixels.show()
 
 
 def main_loop():

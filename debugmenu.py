@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
 ##########################################
 
-class MyDebugMenu(object):
+class MyDebugMenu():
     """MyDebugMenu."""
 
     def __init__(self, animation):
@@ -76,21 +76,21 @@ class MyDebugMenu(object):
         color = fancyled.CHSV(h=0.5, s=1.0, v=1.0)
         values = self.parse_values(input_string, float)
         print("color values", values)
-        if len(values) is 1:
+        if len(values) == 1:
             # white
             color = fancyled.CHSV(
                 h=0.5,
                 s=0.0,
                 v=values[0]
             )
-        elif len(values) is 2:
+        elif len(values) == 2:
             # full saturated color
             color = fancyled.CHSV(
                 h=values[0],
                 s=1.0,
                 v=values[1]
             )
-        elif len(values) is 3:
+        elif len(values) == 3:
             # full color
             color = fancyled.CHSV(
                 h=values[0],
@@ -131,6 +131,31 @@ class MyDebugMenu(object):
             pixel_index, value, value, value)
         self.animation.pixels.show()
 
+    def handle_pixel_set_color(self, input_string):
+        """Handle Pixel Set Color."""
+        print("handle_pixel_set_color")
+        pixel_index = 0
+        sep = input_string.find(":")
+        seperator_pos = input_string.find(":")
+        if seperator_pos == -1:
+            pixel_index = self.parse_value(input_string[1:sep], int)
+            color = fancyled.CHSV(h=0.5, s=1.0, v=1.0)
+        else:
+            pixel_index = self.parse_value(input_string[1:sep], int)
+            color = self.parse_color(input_string[seperator_pos+1:])
+        print("pixel_index", pixel_index)
+
+        print(
+            "pixel_index:{:2} "
+            "color:{} "
+            "".format(
+                pixel_index,
+                color,
+            )
+        )
+        self.animation.pixels.set_pixel(pixel_index, color)
+        self.animation.pixels.show()
+
     def handle_pixel_map_set(self, input_string):
         """Handle Pixel Set."""
         print("handle_pixel_map_set")
@@ -142,8 +167,8 @@ class MyDebugMenu(object):
             values = self.parse_values(input_string[1:], int)
             color = fancyled.CHSV(h=0.5, s=1.0, v=1.0)
         else:
-            values = self.parse_values(input_string[1:sep_value], int)
-            color = self.parse_color(input_string[sep_value+1:])
+            values = self.parse_values(input_string[1:seperator_pos], int)
+            color = self.parse_color(input_string[seperator_pos+1:])
         print("values", values)
         try:
             col, row = values
@@ -222,8 +247,10 @@ class MyDebugMenu(object):
             "    H V '0.2,1.0'\n"
             "      V '1.0'\n"
             "- test: 't12,12'\n"
+            "- Chakra Colors: 'C'\n"
             "- all off 'off'\n"
             "- single pixel by index: 'p14:65000'\n"
+            "- single pixel color by index: 'P14:color'\n"
             "- single pixel by col row: 'm2,5:color'\n"
             "- full row: 'r2:color'\n"
             "- toggle animation: 'a'\n"
@@ -245,10 +272,14 @@ class MyDebugMenu(object):
             self.animation.pixels.show()
         elif "p" in input_string:
             self.handle_pixel_set(input_string)
+        elif "P" in input_string:
+            self.handle_pixel_set_color(input_string)
         elif "m" in input_string:
             self.handle_pixel_map_set(input_string)
         elif "t" in input_string:
             self.handle_test(input_string)
+        elif "C" in input_string:
+            self.animation.set_chakra_colors()
         elif "r" in input_string:
             self.handle_row_set(input_string)
         elif "a" in input_string:
