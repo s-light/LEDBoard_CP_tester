@@ -12,7 +12,7 @@ import board
 import busio
 import supervisor
 
-from adafruit_tlc59711.adafruit_tlc59711_multi import TLC59711Multi
+import adafruit_tlc59711
 import adafruit_fancyled.adafruit_fancyled as fancyled
 from pixel_map import PixelMap2D
 
@@ -26,15 +26,15 @@ from helper import time_measurement_call
 
 
 ##########################################
-if __name__ == '__main__':
+if __name__ == "__main__":
     print()
-    print(42 * '*')
+    print(42 * "*")
     print(__doc__)
-    print(42 * '*')
+    print(42 * "*")
     print()
 
 ##########################################
-print(42 * '*')
+print(42 * "*")
 print("define pixel array / init TLC5971")
 
 ##########################################
@@ -117,19 +117,19 @@ def mymap_LEDBoard_4x4_16bit(self, *, col=0, row=0):
 pmap = PixelMap2D(
     row_count=Matrix_row_count,
     col_count=Matrix_col_count,
-    map_function=mymap_LEDBoard_4x4_16bit
+    map_function=mymap_LEDBoard_4x4_16bit,
 )
 
 ##########################################
 # led controller
 
 spi = busio.SPI(board.SCK, MOSI=board.MOSI)
-pixels = TLC59711Multi(spi, pixel_count=Matrix_pixel_count)
+pixels = adafruit_tlc59711.TLC59711(spi, pixel_count=Matrix_pixel_count)
 
 
 def pixels_init_BCData():
     """Initialise global brightness control data."""
-    BCValues = TLC59711Multi.calculate_BCData(
+    BCValues = adafruit_tlc59711.TLC59711.calculate_BCData(
         Ioclmax=18,
         IoutR=18,
         IoutG=11,
@@ -164,10 +164,10 @@ chakra_diagonal = [
 
 paper_colors_day = [
     # frame
-    (0,  (0.15, 0.8, 0.2)),
-    (3,  (0.15, 0.8, 0.4)),
+    (0, (0.15, 0.8, 0.2)),
+    (3, (0.15, 0.8, 0.4)),
     # hills
-    (4,  (0.25, 1.0, 0.5)),
+    (4, (0.25, 1.0, 0.5)),
     (8, (0.25, 1.0, 0.8)),
     # mountains mid
     (9, (0.3, 0.5, 0.7)),
@@ -191,10 +191,10 @@ paper_colors_day = [
 
 paper_colors_night = [
     # frame
-    (0,  (0.15, 0.8, 0.07)),
-    (3,  (0.15, 0.8, 0.1)),
+    (0, (0.15, 0.8, 0.07)),
+    (3, (0.15, 0.8, 0.1)),
     # hills
-    (4,  (0.25, 1.0, 0.1)),
+    (4, (0.25, 1.0, 0.1)),
     (8, (0.25, 1.0, 0.2)),
     # mountains mid
     (9, (0.15, 0.8, 0.2)),
@@ -218,6 +218,7 @@ paper_colors_night = [
 
 ##########################################
 
+
 class MyAnimation(object):
     """MyAnimation."""
 
@@ -232,7 +233,7 @@ class MyAnimation(object):
         self.animation_run = True
         # self.animation_run = False
         # self.brightness = 0.001
-        self.brightness = 0.02
+        self.brightness = 0.01
         self.paper_colors_current = paper_colors_day
 
     ##########################################
@@ -241,24 +242,16 @@ class MyAnimation(object):
     @staticmethod
     def test_set_corners_to_colors():
         """Test Function: Set all 4 corners to different collors."""
-        print(42 * '*')
+        print(42 * "*")
         print("set corners to colors")
-        pixels[pmap.map(
-            col=0,
-            row=0
-        )] = (0.2, 0.05, 0.0)
-        pixels[pmap.map(
-            col=0,
-            row=Matrix_row_count-1
-        )] = (0.1, 0.0, 0.2)
-        pixels[pmap.map(
-            col=Matrix_col_count-1,
-            row=0
-        )] = (0.1, 0.2, 0.0)
-        pixels[pmap.map(
-            col=Matrix_col_count-1,
-            row=Matrix_row_count-1
-        )] = (0.0, 0.1, 0.2)
+        pixels[pmap.map(col=0, row=0)] = (0.2, 0.05, 0.0)
+        pixels[pmap.map(col=0, row=Matrix_row_count - 1)] = (0.1, 0.0, 0.2)
+        pixels[pmap.map(col=Matrix_col_count - 1, row=0)] = (0.1, 0.2, 0.0)
+        pixels[pmap.map(col=Matrix_col_count - 1, row=Matrix_row_count - 1)] = (
+            0.0,
+            0.1,
+            0.2,
+        )
         # print("{:>3}:{:>3} = {:>3}".format(0, 0, pmap.map(0, 0)))
         # print("{:>3}:{:>3} = {:>3}".format(0, 7, pmap.map(0, 7)))
         # print("{:>3}:{:>3} = {:>3}".format(15, 0, pmap.map(15, 0)))
@@ -271,7 +264,7 @@ class MyAnimation(object):
 
     def set_chakra_colors(self):
         """Set chakra colors"""
-        print(42 * '*')
+        print(42 * "*")
         print("set chakra colors")
         for x in range(Matrix_col_count):
             for y in range(Matrix_row_count):
@@ -283,13 +276,9 @@ class MyAnimation(object):
                 # color = chakra_diagonal[x][y]
                 color = fancyled.CHSV(*chakra_diagonal[x][y])
                 color_r, color_g, color_b = fancyled.gamma_adjust(
-                    color,
-                    brightness=self.brightness
+                    color, brightness=self.brightness
                 )
-                pixels.set_pixel_float_value(
-                    pixel_index,
-                    color_r, color_g, color_b
-                )
+                pixels.set_pixel_float_value(pixel_index, color_r, color_g, color_b)
 
         pixels.show()
         pixels.show()
@@ -344,13 +333,11 @@ class MyAnimation(object):
                 # v=0.05
             )
             color_r, color_g, color_b = fancyled.gamma_adjust(
-                color,
-                brightness=self.brightness
+                color, brightness=self.brightness
             )
             for col_index in range(Matrix_col_count):
                 pixels.set_pixel_float_value(
-                    pmap.map_raw[row_index][col_index],
-                    color_r, color_g, color_b
+                    pmap.map_raw[row_index][col_index], color_r, color_g, color_b
                 )
         pixels.show()
 
@@ -381,16 +368,11 @@ class MyAnimation(object):
             color = fancyled.CHSV(
                 self.offset +
                 # (row_index / Matrix_row_count),
-                map_range(
-                    row_index,
-                    0, Matrix_row_count*2,
-                    0, 1.0
-                ),
+                map_range(row_index, 0, Matrix_row_count * 2, 0, 1.0),
                 # v=0.05
             )
             color_r, color_g, color_b = fancyled.gamma_adjust(
-                color,
-                brightness=self.brightness
+                color, brightness=self.brightness
             )
 
             for col_index in range(Matrix_col_count):
@@ -398,7 +380,9 @@ class MyAnimation(object):
                 pixels.set_pixel_float_value(
                     # pmap.map(col=col_index, row=row_index),
                     pmap.map_raw[row_index][col_index],
-                    color_r, color_g, color_b
+                    color_r,
+                    color_g,
+                    color_b,
                 )
                 # pixels.set_pixel_float_value(
                 #     pmap.map_raw[row_index][col_index],
@@ -439,8 +423,7 @@ class MyAnimation(object):
             #     # v=0.05
             # )
             color_r, color_g, color_b = fancyled.gamma_adjust(
-                color,
-                brightness=self.brightness
+                color, brightness=self.brightness
             )
 
             # row_i = row_index
@@ -462,8 +445,7 @@ class MyAnimation(object):
                 #     "".format(row_i, col_i)
                 # )
                 pixels.set_pixel_float_value(
-                    pmap.map_raw[row_i][col_i],
-                    color_r, color_g, color_b
+                    pmap.map_raw[row_i][col_i], color_r, color_g, color_b
                 )
         pixels.show()
 
@@ -490,8 +472,7 @@ class MyAnimation(object):
     def set_pixel_color(self, row_index, col_index, color):
         """Set pixel color."""
         color_r, color_g, color_b = fancyled.gamma_adjust(
-            color,
-            brightness=self.brightness
+            color, brightness=self.brightness
         )
 
         my_col_count = int(Matrix_col_count / 2)
@@ -503,27 +484,18 @@ class MyAnimation(object):
             # pixel_index = pmap.map(col=col, row=row)
             pixel_index = pmap.map_raw[row][col]
         except IndexError as e:
-            print(
-                "{}; "
-                "row:'{:>3}' "
-                "col:'{:>3}' "
-                "".format(e, col, row)
-            )
+            print("{}; " "row:'{:>3}' " "col:'{:>3}' " "".format(e, col, row))
         # try:
         #     pixel_index = self.animation.pmap.map(col=col, row=row)
         # except IndexError as e:
         #     print("{}; col:'{:>3}' row:'{:>3}'".format(e, col, row))
-        pixels.set_pixel_float_value(
-            pixel_index,
-            color_r, color_g, color_b
-        )
+        pixels.set_pixel_float_value(pixel_index, color_r, color_g, color_b)
         return pixel_index
 
     def set_row_color(self, row_index, color):
         """Set row color."""
         color_r, color_g, color_b = fancyled.gamma_adjust(
-            color,
-            brightness=self.brightness
+            color, brightness=self.brightness
         )
 
         # set all columns to same value
@@ -537,16 +509,8 @@ class MyAnimation(object):
                 # pixel_index = pmap.map(col=col, row=row)
                 pixel_index = pmap.map_raw[row][col]
             except IndexError as e:
-                print(
-                    "{}; "
-                    "row:'{:>3}' "
-                    "col:'{:>3}' "
-                    "".format(e, col, row)
-                )
-            pixels.set_pixel_float_value(
-                pixel_index,
-                color_r, color_g, color_b
-            )
+                print("{}; " "row:'{:>3}' " "col:'{:>3}' " "".format(e, col, row))
+            pixels.set_pixel_float_value(pixel_index, color_r, color_g, color_b)
 
     ##########################################
     # main animation handling
@@ -578,11 +542,8 @@ class MyAnimation(object):
         def _test():
             self.rainbow_update()
             self.rainbow_update_offset()
-        time_measurement_call(
-            "'self.rainbow_update()'",
-            _test,
-            loop_count
-        )
+
+        time_measurement_call("'self.rainbow_update()'", _test, loop_count)
 
     def time_measurement_test1(self):
         """Measure timing."""
@@ -592,11 +553,8 @@ class MyAnimation(object):
         def _test():
             self.test_paper1_update()
             self.test_paper1_update_offset()
-        time_measurement_call(
-            "'self.test_paper1_update()'",
-            _test,
-            loop_count
-        )
+
+        time_measurement_call("'self.test_paper1_update()'", _test, loop_count)
 
     def time_measurement_minimal(self):
         """Measure timing."""
@@ -605,11 +563,8 @@ class MyAnimation(object):
 
         def _test():
             self.test_minimal_update()
-        time_measurement_call(
-            "'self.test_minimal_update()'",
-            _test,
-            loop_count
-        )
+
+        time_measurement_call("'self.test_minimal_update()'", _test, loop_count)
 
     def run_test(self):
         """Test Main."""
@@ -638,10 +593,10 @@ class MyAnimation(object):
 ##########################################
 # main loop
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     my_animation = MyAnimation()
     my_animation.run_test()
-    print(42 * '*')
+    print(42 * "*")
     print("loop")
     while True:
         my_animation.update()

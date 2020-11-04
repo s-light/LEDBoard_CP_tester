@@ -17,11 +17,11 @@ import debugmenu
 
 
 ##########################################
-if __name__ == '__main__':
+if __name__ == "__main__":
     print()
-    print(42 * '*')
+    print(42 * "*")
     print(__doc__)
-    print(42 * '*')
+    print(42 * "*")
     print()
 
 
@@ -34,9 +34,10 @@ my_debug_menu = debugmenu.MyDebugMenu(my_animation)
 ##########################################
 # main
 
+
 def main_setup():
     """Setup."""
-    print(42 * '*')
+    print(42 * "*")
     # time.sleep(0.5)
     # animation.pmap.print_mapping()
 
@@ -58,11 +59,11 @@ def main_loop():
     # time.sleep(0.1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # print(42 * '*')
     print("setup")
     main_setup()
-    print(42 * '*')
+    print(42 * "*")
     print("loop")
     while True:
         main_loop()
